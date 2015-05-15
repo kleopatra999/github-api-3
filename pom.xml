@@ -1,37 +1,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.kohsuke</groupId>
-    <artifactId>pom</artifactId>
-    <version>14</version>
-  </parent>
 
+  <groupId>com.sourceclear</groupId>
   <artifactId>github-api</artifactId>
   <version>1.69-SNAPSHOT</version>
   <name>GitHub API for Java</name>
-  <url>http://github-api.kohsuke.org/</url>
   <description>GitHub API for Java</description>
 
   <scm>
-    <connection>scm:git:git@github.com/kohsuke/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/kohsuke/${project.artifactId}.git</developerConnection>
-    <url>http://${project.artifactId}.kohsuke.org/</url>
+    <url>http://github.com/sourceclear/github-api</url>
+    <connection>scm:git:git@github.com:sourceclear/github-api.git</connection>
+    <developerConnection>scm:git:git@github.com:sourceclear/github-api.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
-    <site>
-      <id>github-pages</id>
-      <url>gitsite:git@github.com/kohsuke/${project.artifactId}.git</url>
-    </site>
+    <snapshotRepository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>sourceclearSnapshots</id>
+      <name>SourceClear Snapshots</name>
+      <url>https://maven.sourceclear.io/content/repositories/sourceclear-snapshots/</url>
+      <layout>default</layout>
+    </snapshotRepository>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>sourceclearReleases</id>
+      <name>SourceClear Releases</name>
+      <url>https://maven.sourceclear.io/content/repositories/sourceclear-releases/</url>
+      <layout>default</layout>
+    </repository>
   </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skipTests>true</skipTests> <!-- tests seemingly require specific GH auth credentials -->
   </properties>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+
       <plugin>
         <groupId>com.infradna.tool</groupId>
         <artifactId>bridge-method-injector</artifactId>
