@@ -1,3 +1,11 @@
 Java API for GitHub
 
 See http://github-api.kohsuke.org/ for more details
+
+The SourceClear fork of this project contains updates to enable org-level
+webhook functionality.
+
+See: https://github.com/kohsuke/github-api/pull/192
+
+Note that we are branched off of the latest release tag 1.68 because the
+current master (1.69-SNAPSHOT) in this project is critically broken.
