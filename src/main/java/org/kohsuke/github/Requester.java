@@ -96,8 +96,9 @@ class Requester {
      *
      * If a header of the same name is already set, this method overrides it.
      */
-    public void setHeader(String name, String value) {
+    public Requester setHeader(String name, String value) {
         headers.put(name,value);
+        return this;
     }
 
     /**
