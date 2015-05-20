@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -284,10 +283,15 @@ public class GHOrganization extends GHPerson {
     }
 
     public GHHook createWebHook(URL url, Collection<GHEvent> events) throws IOException {
-        return createHook("web", Collections.singletonMap("url", url.toExternalForm()),events,true);
+        return createHook("web", Collections.singletonMap("url", url.toExternalForm()), events, true);
     }
 
     public GHHook createWebHook(URL url) throws IOException {
         return createWebHook(url, null);
+    }
+
+    //    GET /orgs/:org/memberships/:username
+    public GHOrganizationMembership getUsersMembership(GHUser user) throws IOException {
+        return root.retrieve().setHeader("Accept", "application/vnd.github.moondragon+json").to("/orgs/" + this.login + "/memberships/" + user.login, GHOrganizationMembership.class);
     }
 }
