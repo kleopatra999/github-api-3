@@ -9,36 +9,37 @@ import java.net.URL;
  *
  */
 public class GHOrganizationMembership {
-  private URL url, organization_url;
 
-  private String state, role;
+    private URL url, organization_url;
 
-  private GHUser user;
+    private String state, role;
 
-  private GHOrganization organization;
+    private GHUser user;
 
-  public URL getUrl() {
-    return url;
-  }
+    private GHOrganization organization;
 
-  public URL getOrganizationUrl() {
-    return organization_url;
-  }
+    public URL getUrl() {
+        return url;
+    }
 
-  public String getState() {
-    return state;
-  }
+    public URL getOrganizationUrl() {
+        return organization_url;
+    }
 
-  public String getRole() {
-    return role;
-  }
+    public String getState() {
+      return state;
+    }
 
-  public GHUser getUser() {
-    return user;
-  }
+    public String getRole() {
+        return role;
+    }
 
-  public GHOrganization getOrganization() {
-    return organization;
-  }
+    public GHUser getUser() {
+        return user;
+    }
+
+    public GHOrganization getOrganization() {
+        return organization;
+    }
 
 }
