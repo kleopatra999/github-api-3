@@ -3,7 +3,7 @@
 
   <groupId>com.sourceclear</groupId>
   <artifactId>github-api</artifactId>
-  <version>1.70</version>
+  <version>1.71-SNAPSHOT</version>
   <name>GitHub API for Java</name>
   <description>GitHub API for Java</description>
 
@@ -11,7 +11,7 @@
     <url>http://github.com/sourceclear/github-api</url>
     <connection>scm:git:git@github.com:sourceclear/github-api.git</connection>
     <developerConnection>scm:git:git@github.com:sourceclear/github-api.git</developerConnection>
-    <tag>github-api-1.70</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <distributionManagement>
