@@ -292,6 +292,6 @@ public class GHOrganization extends GHPerson {
 
     //    GET /orgs/:org/memberships/:username
     public GHOrganizationMembership getUsersMembership(GHUser user) throws IOException {
-        return root.retrieve().setHeader("Accept", "application/vnd.github.moondragon+json").to("/orgs/" + this.login + "/memberships/" + user.login, GHOrganizationMembership.class);
+        return root.retrieve().enableOrgPermissionAPIPreview().to("/orgs/" + this.login + "/memberships/" + user.login, GHOrganizationMembership.class);
     }
 }

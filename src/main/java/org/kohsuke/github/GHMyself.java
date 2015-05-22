@@ -68,10 +68,18 @@ public class GHMyself extends GHUser {
      * @return
      *      Always non-null.
      */
-  public List<GHVerifiedKey> getPublicVerifiedKeys() throws IOException {
-    return Collections.unmodifiableList(Arrays.asList(root.retrieve().to(
-        "/users/" + getLogin() + "/keys", GHVerifiedKey[].class)));
-  }
+    public List<GHVerifiedKey> getPublicVerifiedKeys() throws IOException {
+      return Collections.unmodifiableList(Arrays.asList(root.retrieve().to(
+          "/users/" + getLogin() + "/keys", GHVerifiedKey[].class)));
+    }
+
+    /**
+     * Get this users' org memberships
+     */
+    public List<GHOrganizationMembership> getOrgMemberships() throws IOException {
+      GHOrganizationMembership[] memberships = root.retrieve().enableOrgPermissionAPIPreview().to("/user/memberships/orgs", GHOrganizationMembership[].class);
+      return Collections.unmodifiableList(Arrays.asList(memberships));
+    }
 
     /**
      * Gets the organization that this user belongs to.
