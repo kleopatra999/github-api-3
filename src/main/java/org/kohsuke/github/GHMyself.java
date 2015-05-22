@@ -68,10 +68,35 @@ public class GHMyself extends GHUser {
      * @return
      *      Always non-null.
      */
-  public List<GHVerifiedKey> getPublicVerifiedKeys() throws IOException {
-    return Collections.unmodifiableList(Arrays.asList(root.retrieve().to(
-        "/users/" + getLogin() + "/keys", GHVerifiedKey[].class)));
-  }
+    public List<GHVerifiedKey> getPublicVerifiedKeys() throws IOException {
+      return Collections.unmodifiableList(Arrays.asList(root.retrieve().to(
+          "/users/" + getLogin() + "/keys", GHVerifiedKey[].class)));
+    }
+
+    /**
+     * Get this users' org memberships
+     */
+    public PagedIterable<GHOrganizationMembership> getOrgMemberships() throws IOException {
+        return getOrgMemberships(30);
+    }
+
+    /**
+     * Get this users' org memberships
+     */
+    public PagedIterable<GHOrganizationMembership> getOrgMemberships(final int pageSize) throws IOException {
+        return new PagedIterable<GHOrganizationMembership>() {
+            public PagedIterator<GHOrganizationMembership> iterator() {
+                return new PagedIterator<GHOrganizationMembership>(root.retrieve().enableOrgPermissionAPIPreview().asIterator("/user/memberships/orgs", GHOrganizationMembership[].class)) {
+                    @Override
+                    protected void wrapUp(GHOrganizationMembership[] page) {
+                        for (GHOrganizationMembership c : page) {
+                            c.wrap(root);
+                        }
+                    }
+                };
+            }
+        };
+    }
 
     /**
      * Gets the organization that this user belongs to.

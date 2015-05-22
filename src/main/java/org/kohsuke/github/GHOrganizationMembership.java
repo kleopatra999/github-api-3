@@ -42,4 +42,12 @@ public class GHOrganizationMembership {
         return organization;
     }
 
+    /*package*/ void wrap(GitHub root) {
+        if (user != null) {
+            user.root = root;
+        }
+        if (organization != null) {
+            organization.root = root;
+        }
+    }
 }

@@ -176,6 +176,11 @@ class Requester {
         return this;
     }
 
+    public Requester enableOrgPermissionAPIPreview() {
+        setHeader("Accept", "application/vnd.github.moondragon-preview+json");
+        return this;
+    }
+
     public void to(String tailApiUrl) throws IOException {
         to(tailApiUrl,null);
     }
