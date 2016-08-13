@@ -31,13 +31,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -56,6 +54,8 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.WillClose;
 
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.util.Arrays.asList;
 import static java.util.logging.Level.FINE;
 import static org.kohsuke.github.GitHub.*;
@@ -65,6 +65,7 @@ import static org.kohsuke.github.GitHub.*;
  *
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings("WeakerAccess")
 class Requester {
     private final GitHub root;
     private final List<Entry> args = new ArrayList<Entry>();
@@ -80,7 +81,7 @@ class Requester {
     /**
      * Current connection.
      */
-    private HttpURLConnection uc;
+    private HttpConnection uc;
 
     private static class Entry {
         String key;
@@ -118,6 +119,7 @@ class Requester {
      * Makes a request with authentication credential.
      */
     @Deprecated
+    @SuppressWarnings("unused")
     public Requester withCredential() {
         // keeping it inline with retrieveWithAuth not to enforce the check
         // root.requireCredential();
@@ -297,7 +299,7 @@ class Requester {
             setupConnection(root.getApiURL(tailApiUrl));
 
             buildRequest();
-         
+
             try {
                 return wrapStream(uc.getInputStream());
             } catch (IOException e) {
@@ -319,18 +321,19 @@ class Requester {
             uc.setDoOutput(true);
             uc.setRequestProperty("Content-type", contentType);
 
+            final OutputStream output = uc.getOutputStream();
             if (body == null) {
-                Map json = new HashMap();
+                Map<String, Object> json = new HashMap<String, Object>();
                 for (Entry e : args) {
                     json.put(e.key, e.value);
                 }
-                MAPPER.writeValue(uc.getOutputStream(), json);
+                MAPPER.writeValue(output, json);
             } else {
                 try {
                     byte[] bytes = new byte[32768];
-                    int read = 0;
+                    int read;
                     while ((read = body.read(bytes)) != -1) {
-                        uc.getOutputStream().write(bytes, 0, read);
+                        output.write(bytes, 0, read);
                     }
                 } finally {
                     body.close();
@@ -344,9 +347,10 @@ class Requester {
     }
 
     /**
-     * Loads pagenated resources.
+     * Loads paginated resources.
      *
      * Every iterator call reports a new batch.
+     * @throws RuntimeException for an {@code MalformedURLException} when trying build the request URL
      */
     /*package*/ <T> Iterator<T> asIterator(String tailApiUrl, Class<T> type, int pageSize) {
         method("GET");
@@ -372,8 +376,8 @@ class Requester {
 
         try {
             return new PagingIterator<T>(type, root.getApiURL(s.toString()));
-        } catch (IOException e) {
-            throw new Error(e);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -475,33 +479,8 @@ class Requester {
         uc.setRequestProperty("Accept-Encoding", "gzip");
     }
 
-    private void setRequestMethod(HttpURLConnection uc) throws IOException {
-        try {
-            uc.setRequestMethod(method);
-        } catch (ProtocolException e) {
-            // JDK only allows one of the fixed set of verbs. Try to override that
-            try {
-                Field $method = HttpURLConnection.class.getDeclaredField("method");
-                $method.setAccessible(true);
-                $method.set(uc,method);
-            } catch (Exception x) {
-                throw (IOException)new IOException("Failed to set the custom verb").initCause(x);
-            }
-            // sun.net.www.protocol.https.DelegatingHttpsURLConnection delegates to another HttpURLConnection
-            try {
-                Field $delegate = uc.getClass().getDeclaredField("delegate");
-                $delegate.setAccessible(true);
-                Object delegate = $delegate.get(uc);
-                if (delegate instanceof HttpURLConnection) {
-                    HttpURLConnection nested = (HttpURLConnection) delegate;
-                    setRequestMethod(nested);
-                }
-            } catch (NoSuchFieldException x) {
-                // no problem
-            } catch (IllegalAccessException x) {
-                throw (IOException)new IOException("Failed to set the custom verb").initCause(x);
-            }
-        }
+    private void setRequestMethod(HttpConnection uc) throws IOException {
+        uc.setRequestMethod(method);
         if (!uc.getRequestMethod().equals(method))
             throw new IllegalStateException("Failed to set the request method to "+method);
     }
@@ -527,10 +506,11 @@ class Requester {
                 try {
                     return MAPPER.readValue(data,type);
                 } catch (JsonMappingException e) {
+                    //noinspection UnnecessaryInitCause
                     throw (IOException)new IOException("Failed to deserialize " +data).initCause(e);
                 }
             if (instance!=null)
-                return MAPPER.readerForUpdating(instance).<T>readValue(data);
+                return MAPPER.readerForUpdating(instance).readValue(data);
             return null;
         } catch (FileNotFoundException e) {
             // java.net.URLConnection handles 404 exception has FileNotFoundException, don't wrap exception in HttpException
@@ -569,7 +549,7 @@ class Requester {
                         " handling exception " + e, e);
             throw e;
         }
-        if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) // 401 / Unauthorized == bad creds
+        if (responseCode == HTTP_UNAUTHORIZED) // 401 / Unauthorized == bad creds
             throw e;
 
         if ("0".equals(uc.getHeaderField("X-RateLimit-Remaining"))) {
@@ -578,7 +558,7 @@ class Requester {
         }
 
         // Retry-After is not documented but apparently that field exists
-        if (responseCode == HttpURLConnection.HTTP_FORBIDDEN &&
+        if (responseCode == HTTP_FORBIDDEN &&
             uc.getHeaderField("Retry-After") != null) {
             this.root.abuseLimitHandler.onError(e,uc);
             return;
@@ -591,6 +571,7 @@ class Requester {
                     // pass through 404 Not Found to allow the caller to handle it intelligently
                     throw (IOException) new FileNotFoundException(IOUtils.toString(es, "UTF-8")).initCause(e);
                 } else
+                    //noinspection UnnecessaryInitCause
                     throw (IOException) new IOException(IOUtils.toString(es, "UTF-8")).initCause(e);
             } else
                 throw e;

@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Locale;
@@ -26,7 +25,7 @@ public class GitHubBuilder {
     /* private */ String user;
     /* private */ String password;
     /* private */ String oauthToken;
-    
+
     private HttpConnector connector;
 
     private RateLimitHandler rateLimitHandler = RateLimitHandler.WAIT;
@@ -126,7 +125,7 @@ public class GitHubBuilder {
         }
         return fromProperties(props);
     }
-    
+
     public static GitHubBuilder fromPropertyFile() throws IOException {
         File homeDir = new File(System.getProperty("user.home"));
         File propertyFile = new File(homeDir, ".github");
@@ -142,10 +141,10 @@ public class GitHubBuilder {
         } finally {
             IOUtils.closeQuietly(in);
         }
-     
+
         return fromProperties(props);
     }
-    
+
     public static GitHubBuilder fromProperties(Properties props) {
         GitHubBuilder self = new GitHubBuilder();
         self.withOAuthToken(props.getProperty("oauth"), props.getProperty("login"));
@@ -191,8 +190,8 @@ public class GitHubBuilder {
      */
     public GitHubBuilder withProxy(final Proxy p) {
         return withConnector(new ImpatientHttpConnector(new HttpConnector() {
-            public HttpURLConnection connect(URL url) throws IOException {
-                return (HttpURLConnection) url.openConnection(p);
+            public HttpConnection connect(URL url) throws IOException {
+                return (HttpConnection) url.openConnection(p);
             }
         }));
     }

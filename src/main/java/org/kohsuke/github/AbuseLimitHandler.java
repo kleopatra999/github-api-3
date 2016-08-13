@@ -2,7 +2,6 @@ package org.kohsuke.github;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.HttpURLConnection;
 
 /**
  * Pluggable strategy to determine what to do when the API abuse limit is hit.
@@ -28,22 +27,22 @@ public abstract class AbuseLimitHandler {
      * @param uc
      *      Connection that resulted in an error. Useful for accessing other response headers.
      */
-    public abstract void onError(IOException e, HttpURLConnection uc) throws IOException;
+    public abstract void onError(IOException e, HttpConnection uc) throws IOException;
 
     /**
      * Wait until the API abuse "wait time" is passed.
      */
     public static final AbuseLimitHandler WAIT = new AbuseLimitHandler() {
         @Override
-        public void onError(IOException e, HttpURLConnection uc) throws IOException {
+        public void onError(IOException e, HttpConnection uc) throws IOException {
             try {
                 Thread.sleep(parseWaitTime(uc));
-            } catch (InterruptedException _) {
+            } catch (InterruptedException ignored) {
                 throw (InterruptedIOException)new InterruptedIOException().initCause(e);
             }
         }
 
-        private long parseWaitTime(HttpURLConnection uc) {
+        private long parseWaitTime(HttpConnection uc) {
             String v = uc.getHeaderField("Retry-After");
             if (v==null)    return 60 * 1000;   // can't tell, return 1 min
 
@@ -56,7 +55,7 @@ public abstract class AbuseLimitHandler {
      */
     public static final AbuseLimitHandler FAIL = new AbuseLimitHandler() {
         @Override
-        public void onError(IOException e, HttpURLConnection uc) throws IOException {
+        public void onError(IOException e, HttpConnection uc) throws IOException {
             throw (IOException)new IOException("Abust limit reached").initCause(e);
         }
     };

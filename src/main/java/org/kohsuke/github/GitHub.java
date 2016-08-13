@@ -34,7 +34,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
@@ -239,7 +238,7 @@ public class GitHub {
             throw new IllegalStateException("This operation requires a credential but none is given to the GitHub constructor");
     }
 
-    /*package*/ URL getApiURL(String tailApiUrl) throws IOException {
+    /*package*/ URL getApiURL(String tailApiUrl) throws MalformedURLException {
         if (tailApiUrl.startsWith("/")) {
             if ("github.com".equals(apiUrl)) {// backward compatibility
                 return new URL(GITHUB_URL + tailApiUrl);
@@ -552,7 +551,7 @@ public class GitHub {
      */
     private boolean isPrivateModeEnabled() {
         try {
-            HttpURLConnection uc = getConnector().connect(getApiURL("/"));
+            HttpConnection uc = getConnector().connect(getApiURL("/"));
             /*
                 $ curl -i https://github.mycompany.com/api/v3/
                 HTTP/1.1 401 Unauthorized

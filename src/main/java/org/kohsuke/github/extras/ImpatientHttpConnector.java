@@ -2,9 +2,9 @@ package org.kohsuke.github.extras;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.kohsuke.github.HttpConnector;
+import org.kohsuke.github.HttpConnection;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
@@ -37,8 +37,8 @@ public class ImpatientHttpConnector implements HttpConnector {
         this(base,CONNECT_TIMEOUT,READ_TIMEOUT);
     }
 
-    public HttpURLConnection connect(URL url) throws IOException {
-        HttpURLConnection con = base.connect(url);
+    public HttpConnection connect(URL url) throws IOException {
+        HttpConnection con = base.connect(url);
         con.setConnectTimeout(connectTimeout);
         con.setReadTimeout(readTimeout);
         return con;

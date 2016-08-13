@@ -78,9 +78,9 @@
         <executions>
           <execution>
             <id>run-findbugs</id>
-            <phase>verify</phase> 
+            <phase>verify</phase>
             <goals>
-              <goal>check</goal> 
+              <goal>check</goal>
             </goals>
           </execution>
         </executions>
@@ -136,6 +136,12 @@
       <groupId>com.squareup.okhttp</groupId>
       <artifactId>okhttp-urlconnection</artifactId>
       <version>2.7.5</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>

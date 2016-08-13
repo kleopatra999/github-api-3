@@ -3,9 +3,10 @@ package org.kohsuke.github.extras;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.OkUrlFactory;
 import org.kohsuke.github.HttpConnector;
+import org.kohsuke.github.HttpConnection;
+import org.kohsuke.github.JavaNetHttpConnection;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
@@ -19,6 +20,7 @@ import java.net.URL;
  * @author Roberto Tyley
  * @author Kohsuke Kawaguchi
  */
+@SuppressWarnings("unused")
 public class OkHttpConnector implements HttpConnector {
     private final OkUrlFactory urlFactory;
 
@@ -26,7 +28,7 @@ public class OkHttpConnector implements HttpConnector {
         this.urlFactory = urlFactory;
     }
 
-    public HttpURLConnection connect(URL url) throws IOException {
-        return urlFactory.open(url);
+    public HttpConnection connect(URL url) throws IOException {
+        return new JavaNetHttpConnection(urlFactory.open(url));
     }
 }
